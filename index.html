@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Χάρτης Λαγοκέφαλου(Lagocephalus gotronus) — Ελλάδα</title>
+
+<style>
+  :root {
+    --deep-sea: #0a2540;
+    --foam: #f6f3ea;
+    --coral: #e8633a;
+    --coral-dark: #c44f2c;
+    --text-soft: rgba(10,37,64,0.62);
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    height: 100%;
+    font-family: 'Georgia', 'Times New Roman', serif;
+    background: linear-gradient(160deg, #0a2540 0%, #133a5e 55%, #1d5a82 100%);
+    color: var(--foam);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  .card {
+    max-width: 480px;
+    text-align: center;
+  }
+
+  .emoji {
+    font-size: 3rem;
+    margin-bottom: 8px;
+  }
+
+  h1 {
+    font-size: 1.9rem;
+    font-weight: 400;
+    margin: 0 0 6px;
+    letter-spacing: 0.01em;
+  }
+
+  .latin {
+    font-style: italic;
+    font-size: 1rem;
+    opacity: 0.65;
+    display: block;
+    margin-bottom: 22px;
+  }
+
+  p.lead {
+    font-family: -apple-system, system-ui, sans-serif;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: rgba(246,243,234,0.82);
+    margin-bottom: 30px;
+  }
+
+  .btn {
+    display: inline-block;
+    background: var(--coral);
+    color: white;
+    font-family: -apple-system, system-ui, sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+    text-decoration: none;
+    padding: 14px 30px;
+    border-radius: 999px;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.3);
+    transition: background 0.15s ease, transform 0.1s ease;
+  }
+  .btn:hover { background: var(--coral-dark); }
+  .btn:active { transform: scale(0.97); }
+
+  footer {
+    margin-top: 40px;
+    font-family: -apple-system, system-ui, sans-serif;
+    font-size: 0.72rem;
+    color: rgba(246,243,234,0.45);
+  }
+</style>
+</head>
+<body>
+
+  <div class="card">
+    <div class="emoji">🐡</div>
+    <h1>Χάρτης Λαγοκέφαλου
+      <span class="latin">Lagocephalus sceleratus — αναφορές πολιτών</span>
+    </h1>
+    <p class="lead">
+      Ένα εθελοντικό, ανοιχτό εργαλείο καταγραφής εμφανίσεων λαγόκεφαλου
+      στις ελληνικές παραλίες. Σημείωσε πού τον είδες, και βοήθησε
+      να χτίσουμε μαζί έναν ζωντανό χάρτη της κατάστασης.
+    </p>
+    <a class="btn" href="lagokefalos-map.html">Δες τον χάρτη →</a>
+    <footer>Μη επίσημο εργαλείο — δεν αντικαθιστά το ELNAIS ή επιστημονικά δίκτυα παρακολούθησης.</footer>
+  </div>
+
+</body>
+</html>
