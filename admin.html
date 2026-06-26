@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Διαχείριση Αναφορών — Λαγόκεφαλος</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+  :root {
+    --deep-sea: #0a2540;
+    --mid-sea: #133a5e;
+    --foam: #f6f3ea;
+    --coral: #e8633a;
+    --coral-dark: #c44f2c;
+    --approve-green: #1d7a4c;
+    --line: rgba(10,37,64,0.12);
+    --text-soft: rgba(10,37,64,0.62);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: -apple-system, system-ui, sans-serif;
+    background: var(--foam);
+    color: var(--deep-sea);
+    min-height: 100vh;
+  }
+
+  header {
+    background: var(--deep-sea);
+    color: var(--foam);
+    padding: 16px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 3px solid var(--coral);
+  }
+
+  header h1 {
+    font-family: Georgia, serif;
+    font-size: 1.15rem;
+    font-weight: 400;
+    margin: 0;
+  }
+
+  #logout-btn {
+    background: transparent;
+    border: 1.5px solid rgba(246,243,234,0.4);
+    color: var(--foam);
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 0.82rem;
+    cursor: pointer;
+    display: none;
+  }
+  #logout-btn:hover { background: rgba(246,243,234,0.1); }
+
+  main {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 30px 20px 60px;
+  }
+
+  /* ---- Login ---- */
+  #login-card {
+    background: white;
+    border-radius: 10px;
+    padding: 30px;
+    max-width: 360px;
+    margin: 60px auto;
+    box-shadow: 0 4px 18px rgba(10,37,64,0.1);
+  }
+  #login-card h2 {
+    font-family: Georgia, serif;
+    margin-top: 0;
+    font-size: 1.2rem;
+  }
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-size: 0.82rem; font-weight: 600; margin-bottom: 5px; }
+  .field input {
+    width: 100%;
+    padding: 9px 11px;
+    border: 1.5px solid var(--line);
+    border-radius: 6px;
+    font-size: 0.92rem;
+    font-family: inherit;
+  }
+  .field input:focus { outline: none; border-color: var(--coral); }
+
+  .btn {
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 10px 16px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+  }
+  .btn-primary { background: var(--coral); color: white; width: 100%; }
+  .btn-primary:hover { background: var(--coral-dark); }
+  .btn-primary:disabled { opacity: 0.6; cursor: default; }
+
+  #login-error {
+    color: var(--coral-dark);
+    font-size: 0.82rem;
+    margin-top: 10px;
+    display: none;
+  }
+
+  /* ---- Dashboard ---- */
+  #dashboard { display: none; }
+
+  #dashboard h2 {
+    font-family: Georgia, serif;
+    font-size: 1.1rem;
+    margin-bottom: 4px;
+  }
+  #summary {
+    font-size: 0.85rem;
+    color: var(--text-soft);
+    margin-bottom: 22px;
+  }
+
+  .card {
+    background: white;
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin-bottom: 14px;
+    box-shadow: 0 2px 10px rgba(10,37,64,0.07);
+    border-left: 4px solid var(--coral);
+  }
+  .card.approved { border-left-color: var(--approve-green); opacity: 0.7; }
+
+  .card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .card-top .loc {
+    font-family: Georgia, serif;
+    font-weight: 600;
+    font-size: 1.02rem;
+  }
+  .card-top .date { font-size: 0.8rem; color: var(--text-soft); }
+
+  .card .desc {
+    font-size: 0.88rem;
+    margin: 8px 0 4px;
+    color: var(--deep-sea);
+  }
+  .card .meta {
+    font-size: 0.75rem;
+    color: var(--text-soft);
+    margin-bottom: 12px;
+  }
+  .card-photo {
+    max-width: 240px;
+    max-height: 180px;
+    border-radius: 6px;
+    display: block;
+    margin: 8px 0;
+    border: 1px solid var(--line);
+  }
+
+  .card-actions { display: flex; gap: 8px; }
+  .btn-approve, .btn-reject {
+    font-family: inherit;
+    font-size: 0.82rem;
+    font-weight: 600;
+    padding: 7px 14px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+  }
+  .btn-approve { background: var(--approve-green); color: white; }
+  .btn-approve:hover { background: #155f3b; }
+  .btn-reject { background: transparent; color: var(--coral-dark); border: 1.5px solid var(--coral-dark); }
+  .btn-reject:hover { background: rgba(196,79,44,0.08); }
+
+  .badge {
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 999px;
+    text-transform: uppercase;
+  }
+  .badge.pending { background: rgba(232,99,58,0.15); color: var(--coral-dark); }
+  .badge.approved { background: rgba(29,122,76,0.15); color: var(--approve-green); }
+
+  #empty-msg {
+    text-align: center;
+    color: var(--text-soft);
+    padding: 40px 0;
+    font-size: 0.9rem;
+  }
+
+  .toggle-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+  .toggle-btn {
+    font-family: inherit;
+    font-size: 0.82rem;
+    font-weight: 600;
+    padding: 7px 14px;
+    border-radius: 999px;
+    border: 1.5px solid var(--line);
+    background: white;
+    cursor: pointer;
+    color: var(--text-soft);
+  }
+  .toggle-btn.active {
+    background: var(--deep-sea);
+    color: var(--foam);
+    border-color: var(--deep-sea);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🐡 Διαχείριση Αναφορών</h1>
+  <button id="logout-btn">Αποσύνδεση</button>
+</header>
+
+<main>
+
+  <!-- Login -->
+  <div id="login-card">
+    <h2>Σύνδεση διαχειριστή</h2>
+    <form id="login-form">
+      <div class="field">
+        <label for="email">Email</label>
+        <input type="email" id="email" required autocomplete="username">
+      </div>
+      <div class="field">
+        <label for="password">Κωδικός</label>
+        <input type="password" id="password" required autocomplete="current-password">
+      </div>
+      <button type="submit" class="btn btn-primary" id="login-btn">Σύνδεση</button>
+      <div id="login-error"></div>
+    </form>
+  </div>
+
+  <!-- Dashboard -->
+  <div id="dashboard">
+    <h2>Αναφορές</h2>
+    <div id="summary">Φόρτωση...</div>
+
+    <div class="toggle-row">
+      <button class="toggle-btn active" data-filter="pending">Εκκρεμείς</button>
+      <button class="toggle-btn" data-filter="approved">Εγκεκριμένες</button>
+      <button class="toggle-btn" data-filter="all">Όλες</button>
+    </div>
+
+    <div id="list"></div>
+    <div id="empty-msg" style="display:none;">Δεν υπάρχουν αναφορές σε αυτή την κατηγορία.</div>
+  </div>
+
+</main>
+
+<script>
+  // ====== ΡΥΘΜΙΣΕΙΣ SUPABASE — ΙΔΙΑ ΣΤΟΙΧΕΙΑ ΜΕ ΤΟ lagokefalos-map.html ======
+  const SUPABASE_URL = "https://khymmjpjtfiubwkidgfp.supabase.co";
+  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtoeW1tanBqdGZpdWJ3a2lkZ2ZwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MjUzNDksImV4cCI6MjA5ODAwMTM0OX0.mVP4F-vE_OImK3M6baYEhVugFgR7Kh_Ld6ZRmRFb1Zw";
+  // ============================================================================
+
+  const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  const loginCard = document.getElementById('login-card');
+  const dashboard = document.getElementById('dashboard');
+  const logoutBtn = document.getElementById('logout-btn');
+  const loginForm = document.getElementById('login-form');
+  const loginBtn = document.getElementById('login-btn');
+  const loginError = document.getElementById('login-error');
+  const listEl = document.getElementById('list');
+  const summaryEl = document.getElementById('summary');
+  const emptyMsg = document.getElementById('empty-msg');
+
+  let currentFilter = 'pending';
+  let allRows = [];
+
+  // ---- Έλεγχος αν είμαστε ήδη συνδεδεμένοι (π.χ. μετά από refresh) ----
+  async function checkSession() {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (session) {
+      showDashboard();
+    } else {
+      showLogin();
+    }
+  }
+
+  function showLogin() {
+    loginCard.style.display = 'block';
+    dashboard.style.display = 'none';
+    logoutBtn.style.display = 'none';
+  }
+
+  function showDashboard() {
+    loginCard.style.display = 'none';
+    dashboard.style.display = 'block';
+    logoutBtn.style.display = 'inline-block';
+    loadSightings();
+  }
+
+  // ---- Login ----
+  loginForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    loginBtn.disabled = true;
+    loginBtn.textContent = 'Σύνδεση...';
+    loginError.style.display = 'none';
+
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+
+    const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+
+    loginBtn.disabled = false;
+    loginBtn.textContent = 'Σύνδεση';
+
+    if (error) {
+      loginError.textContent = 'Λάθος email ή κωδικός.';
+      loginError.style.display = 'block';
+    } else {
+      showDashboard();
+    }
+  });
+
+  // ---- Logout ----
+  logoutBtn.addEventListener('click', async () => {
+    await supabaseClient.auth.signOut();
+    showLogin();
+  });
+
+  // ---- Φόρτωση όλων των αναφορών (επιτρέπεται γιατί είμαστε authenticated) ----
+  async function loadSightings() {
+    summaryEl.textContent = 'Φόρτωση...';
+
+    const { data, error } = await supabaseClient
+      .from('sightings')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      summaryEl.textContent = 'Σφάλμα φόρτωσης: ' + error.message;
+      return;
+    }
+
+    allRows = data;
+    renderList();
+  }
+
+  function renderList() {
+    const pendingCount = allRows.filter(r => !r.approved).length;
+    const approvedCount = allRows.filter(r => r.approved).length;
+    summaryEl.textContent = `${pendingCount} εκκρεμείς · ${approvedCount} εγκεκριμένες · ${allRows.length} σύνολο`;
+
+    let filtered;
+    if (currentFilter === 'pending') filtered = allRows.filter(r => !r.approved);
+    else if (currentFilter === 'approved') filtered = allRows.filter(r => r.approved);
+    else filtered = allRows;
+
+    listEl.innerHTML = '';
+    emptyMsg.style.display = filtered.length === 0 ? 'block' : 'none';
+
+    filtered.forEach(row => {
+      const card = document.createElement('div');
+      card.className = 'card' + (row.approved ? ' approved' : '');
+
+      const dateStr = row.sighting_date
+        ? new Date(row.sighting_date).toLocaleDateString('el-GR')
+        : 'άγνωστη ημερομηνία';
+      const submittedStr = new Date(row.created_at).toLocaleString('el-GR');
+
+      const photoHtml = row.photo_url
+        ? `<img class="card-photo" src="${row.photo_url}" alt="Φωτογραφία αναφοράς">`
+        : '';
+
+      card.innerHTML = `
+        <div class="card-top">
+          <span class="loc">${escapeHtml(row.location_name) || 'Άγνωστη τοποθεσία'}</span>
+          <span class="badge ${row.approved ? 'approved' : 'pending'}">${row.approved ? 'Εγκεκριμένη' : 'Εκκρεμεί'}</span>
+        </div>
+        <div class="date">📅 Είδηση: ${dateStr} · Υποβλήθηκε: ${submittedStr}</div>
+        ${row.description ? `<div class="desc">${escapeHtml(row.description)}</div>` : ''}
+        ${photoHtml}
+        <div class="meta">📍 ${row.latitude.toFixed(4)}, ${row.longitude.toFixed(4)}</div>
+        <div class="card-actions">
+          ${!row.approved ? `<button class="btn-approve" data-id="${row.id}" data-action="approve">✓ Έγκριση</button>` : `<button class="btn-reject" data-id="${row.id}" data-action="unapprove">↩ Αναίρεση έγκρισης</button>`}
+          <button class="btn-reject" data-id="${row.id}" data-action="delete">✕ Διαγραφή</button>
+        </div>
+      `;
+      listEl.appendChild(card);
+    });
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  // ---- Ενέργειες (event delegation) ----
+  listEl.addEventListener('click', async (e) => {
+    const btn = e.target.closest('button[data-action]');
+    if (!btn) return;
+
+    const id = btn.dataset.id;
+    const action = btn.dataset.action;
+    btn.disabled = true;
+
+    if (action === 'approve') {
+      await supabaseClient.from('sightings').update({ approved: true }).eq('id', id);
+    } else if (action === 'unapprove') {
+      await supabaseClient.from('sightings').update({ approved: false }).eq('id', id);
+    } else if (action === 'delete') {
+      if (!confirm('Σίγουρα θέλεις να διαγράψεις οριστικά αυτή την αναφορά;')) {
+        btn.disabled = false;
+        return;
+      }
+      await supabaseClient.from('sightings').delete().eq('id', id);
+    }
+
+    loadSightings();
+  });
+
+  // ---- Φίλτρα ----
+  document.querySelectorAll('.toggle-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentFilter = btn.dataset.filter;
+      renderList();
+    });
+  });
+
+  checkSession();
+</script>
+
+</body>
+</html>

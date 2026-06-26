@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Χάρτης Λαγόκεφαλου — Ελλάδα</title>
+
+<!-- Leaflet (βιβλιοθήκη χαρτών) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+
+<!-- Leaflet.markercluster (clustering κουκίδων) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.js"></script>
+
+<!-- Supabase client -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+  :root {
+    --deep-sea: #0a2540;
+    --mid-sea: #133a5e;
+    --foam: #f6f3ea;
+    --coral: #e8633a;
+    --coral-dark: #c44f2c;
+    --warn-yellow: #d9a13b;
+    --line: rgba(10,37,64,0.12);
+    --text-soft: rgba(10,37,64,0.62);
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: 'Georgia', 'Times New Roman', serif;
+    background: var(--foam);
+    color: var(--deep-sea);
+  }
+
+  body {
+    display: flex;
+    flex-direction: column;
+  }
+
+  header {
+    background: var(--deep-sea);
+    color: var(--foam);
+    padding: 18px 24px;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    border-bottom: 3px solid var(--coral);
+  }
+
+  header h1 {
+    font-size: 1.35rem;
+    margin: 0;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+  }
+
+  header h1 .latin {
+    font-style: italic;
+    font-size: 0.85rem;
+    opacity: 0.65;
+    font-family: 'Times New Roman', serif;
+    display: block;
+    margin-top: 2px;
+  }
+
+  header .tagline {
+    font-family: -apple-system, system-ui, sans-serif;
+    font-size: 0.78rem;
+    color: rgba(246,243,234,0.7);
+    max-width: 320px;
+    text-align: right;
+    line-height: 1.4;
+  }
+
+  main {
+    flex: 1;
+    position: relative;
+  }
+
+  #map {
+    width: 100%;
+    height: 100%;
+    background: #bcdcec;
+  }
+
+  /* Μετρητής αναφορών */
+  #counter-badge {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    z-index: 1000;
+    background: rgba(10,37,64,0.92);
+    color: var(--foam);
+    font-family: -apple-system, system-ui, sans-serif;
+    padding: 10px 16px;
+    border-radius: 8px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+    font-size: 0.85rem;
+  }
+  #counter-badge strong {
+    font-size: 1.15rem;
+    color: var(--coral);
+    font-family: Georgia, serif;
+  }
+
+  /* Floating action button */
+  #add-btn {
+    position: absolute;
+    bottom: 28px;
+    right: 24px;
+    z-index: 1000;
+    background: var(--coral);
+    color: var(--foam);
+    border: none;
+    border-radius: 999px;
+    padding: 14px 22px;
+    font-family: -apple-system, system-ui, sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(10,37,64,0.35);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background 0.15s ease, transform 0.1s ease;
+  }
+  #add-btn:hover { background: var(--coral-dark); }
+  #add-btn:active { transform: scale(0.97); }
+  #add-btn:focus-visible { outline: 3px solid var(--warn-yellow); outline-offset: 2px; }
+
+  /* Instruction banner shown while picking a location */
+  #pick-banner {
+    position: absolute;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    background: var(--deep-sea);
+    color: var(--foam);
+    font-family: -apple-system, system-ui, sans-serif;
+    font-size: 0.85rem;
+    padding: 10px 18px;
+    border-radius: 8px;
+    display: none;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+  }
+
+  /* Modal form */
+  #overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(10,37,64,0.55);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    padding: 16px;
+    overflow-y: auto;
+  }
+
+  #form-card {
+    background: var(--foam);
+    border-radius: 10px;
+    max-width: 420px;
+    width: 100%;
+    padding: 26px 26px 22px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    font-family: -apple-system, system-ui, sans-serif;
+    margin: auto;
+  }
+
+  #form-card h2 {
+    font-family: 'Georgia', serif;
+    font-size: 1.25rem;
+    margin: 0 0 4px;
+    color: var(--deep-sea);
+  }
+
+  #form-card .coords {
+    font-size: 0.78rem;
+    color: var(--text-soft);
+    margin-bottom: 18px;
+  }
+
+  .field { margin-bottom: 14px; }
+
+  .field label {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: var(--deep-sea);
+  }
+
+  .field input, .field textarea {
+    width: 100%;
+    padding: 9px 11px;
+    border: 1.5px solid var(--line);
+    border-radius: 6px;
+    font-size: 0.92rem;
+    font-family: inherit;
+    background: white;
+    color: var(--deep-sea);
+  }
+
+  .field input:focus, .field textarea:focus {
+    outline: none;
+    border-color: var(--coral);
+  }
+
+  .field textarea { resize: vertical; min-height: 60px; }
+
+  .field .hint {
+    font-size: 0.74rem;
+    color: var(--text-soft);
+    margin-top: 4px;
+  }
+
+  #photo-preview {
+    margin-top: 8px;
+    max-width: 100%;
+    max-height: 140px;
+    border-radius: 6px;
+    display: none;
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+  }
+
+  .btn {
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 10px 16px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    flex: 1;
+  }
+
+  .btn-primary { background: var(--coral); color: white; }
+  .btn-primary:hover { background: var(--coral-dark); }
+  .btn-primary:disabled { opacity: 0.6; cursor: default; }
+  .btn-secondary { background: transparent; color: var(--text-soft); border: 1.5px solid var(--line); }
+  .btn-secondary:hover { background: rgba(10,37,64,0.05); }
+
+  #status-msg {
+    font-size: 0.85rem;
+    margin-top: 12px;
+    display: none;
+  }
+  #status-msg.success { color: #1d7a4c; display: block; }
+  #status-msg.error { color: var(--coral-dark); display: block; }
+
+  .leaflet-popup-content {
+    font-family: -apple-system, system-ui, sans-serif;
+    font-size: 0.85rem;
+  }
+  .leaflet-popup-content b {
+    font-family: 'Georgia', serif;
+    color: var(--deep-sea);
+  }
+  .popup-photo {
+    width: 100%;
+    max-width: 220px;
+    border-radius: 6px;
+    margin-top: 6px;
+    display: block;
+  }
+
+  /* Cluster styling στα χρώματα του site */
+  .marker-cluster-small, .marker-cluster-medium, .marker-cluster-large {
+    background-color: rgba(232,99,58,0.35) !important;
+  }
+  .marker-cluster-small div, .marker-cluster-medium div, .marker-cluster-large div {
+    background-color: var(--coral) !important;
+    color: white !important;
+    font-family: -apple-system, system-ui, sans-serif;
+    font-weight: 700;
+  }
+
+  footer {
+    background: var(--deep-sea);
+    color: rgba(246,243,234,0.55);
+    font-family: -apple-system, system-ui, sans-serif;
+    font-size: 0.72rem;
+    text-align: center;
+    padding: 8px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Χάρτης Λαγόκεφαλου
+    <span class="latin">Lagocephalus sceleratus — αναφορές πολιτών</span>
+  </h1>
+  <div class="tagline">Σημείωσε πού είδες λαγόκεφαλο. Κάθε αναφορά ελέγχεται πριν εμφανιστεί δημόσια.</div>
+</header>
+
+<main>
+  <div id="map"></div>
+  <div id="counter-badge"><strong id="counter-number">—</strong> επιβεβαιωμένες αναφορές</div>
+  <div id="pick-banner">Πάτησε ένα σημείο στον χάρτη όπου είδες τον λαγόκεφαλο</div>
+  <button id="add-btn">📍 Νέα αναφορά</button>
+</main>
+
+<footer>Μη επίσημο, εθελοντικό εργαλείο καταγραφής — δεν αντικαθιστά το ELNAIS ή επιστημονικά δίκτυα παρακολούθησης.</footer>
+
+<!-- Modal φόρμας -->
+<div id="overlay">
+  <div id="form-card">
+    <h2>Νέα αναφορά εμφάνισης</h2>
+    <div class="coords" id="coords-display"></div>
+
+    <form id="sighting-form">
+      <div class="field">
+        <label for="location_name">Παραλία / περιοχή (προαιρετικό)</label>
+        <input type="text" id="location_name" placeholder="π.χ. Παραλία Ελάφονήσου">
+      </div>
+
+      <div class="field">
+        <label for="sighting_date">Πότε το είδες</label>
+        <input type="date" id="sighting_date" required>
+      </div>
+
+      <div class="field">
+        <label for="description">Περιγραφή (προαιρετικό)</label>
+        <textarea id="description" placeholder="π.χ. Ένα ψάρι, κοντά στην ακτή, 1μ βάθος..."></textarea>
+      </div>
+
+      <div class="field">
+        <label for="photo">Φωτογραφία (προαιρετικό)</label>
+        <input type="file" id="photo" accept="image/jpeg,image/png,image/webp">
+        <div class="hint">Μέγιστο μέγεθος 2MB · JPG, PNG ή WEBP</div>
+        <img id="photo-preview" alt="Προεπισκόπηση">
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" id="cancel-btn">Άκυρο</button>
+        <button type="submit" class="btn btn-primary" id="submit-btn">Υποβολή</button>
+      </div>
+
+      <div id="status-msg"></div>
+    </form>
+  </div>
+</div>
+
+<script>
+  // ====== ΡΥΘΜΙΣΕΙΣ SUPABASE — ΒΑΛΕ ΕΔΩ ΤΑ ΔΙΚΑ ΣΟΥ ΣΤΟΙΧΕΙΑ ======
+  const SUPABASE_URL = "https://khymmjpjtfiubwkidgfp.supabase.co";
+  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtoeW1tanBqdGZpdWJ3a2lkZ2ZwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MjUzNDksImV4cCI6MjA5ODAwMTM0OX0.mVP4F-vE_OImK3M6baYEhVugFgR7Kh_Ld6ZRmRFb1Zw";
+  // ===============================================================
+
+  const MAX_PHOTO_BYTES = 2 * 1024 * 1024; // 2MB
+  const PHOTO_BUCKET = 'sighting-photos';
+
+  const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  // ---- Γεωγραφικά όρια: κλειδώνουμε τον χάρτη γύρω από την Ελλάδα ----
+  // [South-West corner, North-East corner]
+  const GREECE_BOUNDS = [
+    [33.5, 18.5],   // νοτιοδυτικά (κάτω από την Κρήτη, δυτικά του Ιονίου)
+    [42.5, 30.5]    // βορειοανατολικά (πάνω από Έβρο, ανατολικά Ρόδου)
+  ];
+
+  const map = L.map('map', {
+    zoomControl: true,
+    maxBounds: GREECE_BOUNDS,
+    maxBoundsViscosity: 0.9, // "ελαστική αντίσταση" όταν ο χρήστης σπρώχνει έξω από τα όρια
+    minZoom: 6
+  }).setView([38.5, 24.5], 6.4);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap συνεισφέροντες',
+    maxZoom: 18,
+    minZoom: 6
+  }).addTo(map);
+
+  map.fitBounds(GREECE_BOUNDS);
+
+  // ---- Clustering κουκίδων ----
+  const markersLayer = L.markerClusterGroup({
+    maxClusterRadius: 45,
+    spiderfyOnMaxZoom: true,
+  });
+  map.addLayer(markersLayer);
+
+  let pickMode = false;
+  let pendingLatLng = null;
+  let selectedFile = null;
+
+  const addBtn = document.getElementById('add-btn');
+  const pickBanner = document.getElementById('pick-banner');
+  const overlay = document.getElementById('overlay');
+  const coordsDisplay = document.getElementById('coords-display');
+  const form = document.getElementById('sighting-form');
+  const statusMsg = document.getElementById('status-msg');
+  const cancelBtn = document.getElementById('cancel-btn');
+  const photoInput = document.getElementById('photo');
+  const photoPreview = document.getElementById('photo-preview');
+  const counterNumber = document.getElementById('counter-number');
+
+  addBtn.addEventListener('click', () => {
+    pickMode = true;
+    pickBanner.style.display = 'block';
+    addBtn.style.display = 'none';
+    map.getContainer().style.cursor = 'crosshair';
+  });
+
+  map.on('click', (e) => {
+    if (!pickMode) return;
+    pendingLatLng = e.latlng;
+    pickMode = false;
+    pickBanner.style.display = 'none';
+    addBtn.style.display = 'flex';
+    map.getContainer().style.cursor = '';
+    openForm(e.latlng);
+  });
+
+  function openForm(latlng) {
+    coordsDisplay.textContent = `Συντεταγμένες: ${latlng.lat.toFixed(4)}, ${latlng.lng.toFixed(4)}`;
+    document.getElementById('sighting_date').valueAsDate = new Date();
+    statusMsg.style.display = 'none';
+    statusMsg.className = '';
+    overlay.style.display = 'flex';
+  }
+
+  function closeForm() {
+    overlay.style.display = 'none';
+    form.reset();
+    selectedFile = null;
+    photoPreview.style.display = 'none';
+    photoPreview.src = '';
+  }
+
+  cancelBtn.addEventListener('click', closeForm);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) closeForm(); });
+
+  // ---- Έλεγχος φωτογραφίας στο client πριν το upload ----
+  photoInput.addEventListener('change', () => {
+    const file = photoInput.files[0];
+    statusMsg.style.display = 'none';
+
+    if (!file) {
+      selectedFile = null;
+      photoPreview.style.display = 'none';
+      return;
+    }
+
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      statusMsg.textContent = 'Επιτρέπονται μόνο αρχεία JPG, PNG ή WEBP.';
+      statusMsg.className = 'error';
+      photoInput.value = '';
+      selectedFile = null;
+      photoPreview.style.display = 'none';
+      return;
+    }
+
+    if (file.size > MAX_PHOTO_BYTES) {
+      statusMsg.textContent = 'Η φωτογραφία ξεπερνά το όριο των 2MB. Δοκίμασε μικρότερο αρχείο.';
+      statusMsg.className = 'error';
+      photoInput.value = '';
+      selectedFile = null;
+      photoPreview.style.display = 'none';
+      return;
+    }
+
+    selectedFile = file;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      photoPreview.src = ev.target.result;
+      photoPreview.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+  });
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!pendingLatLng) return;
+
+    const submitBtn = document.getElementById('submit-btn');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Υποβολή...';
+    statusMsg.style.display = 'none';
+
+    let photoUrl = null;
+
+    // ---- Αν υπάρχει φωτογραφία, ανέβασέ την πρώτα στο Storage ----
+    if (selectedFile) {
+      const fileExt = selectedFile.name.split('.').pop();
+      const fileName = `${crypto.randomUUID()}.${fileExt}`;
+
+      const { error: uploadError } = await supabaseClient.storage
+        .from(PHOTO_BUCKET)
+        .upload(fileName, selectedFile);
+
+      if (uploadError) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Υποβολή';
+        statusMsg.textContent = 'Σφάλμα στο ανέβασμα φωτογραφίας: ' + uploadError.message;
+        statusMsg.className = 'error';
+        return;
+      }
+
+      const { data: publicUrlData } = supabaseClient.storage
+        .from(PHOTO_BUCKET)
+        .getPublicUrl(fileName);
+
+      photoUrl = publicUrlData.publicUrl;
+    }
+
+    const payload = {
+      latitude: pendingLatLng.lat,
+      longitude: pendingLatLng.lng,
+      location_name: document.getElementById('location_name').value || null,
+      sighting_date: document.getElementById('sighting_date').value || null,
+      description: document.getElementById('description').value || null,
+      photo_url: photoUrl,
+    };
+
+    const { error } = await supabaseClient.from('sightings').insert(payload);
+
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Υποβολή';
+
+    if (error) {
+      statusMsg.textContent = 'Κάτι πήγε στραβά: ' + error.message;
+      statusMsg.className = 'error';
+    } else {
+      statusMsg.textContent = 'Ευχαριστούμε! Η αναφορά θα εμφανιστεί μετά από έλεγχο.';
+      statusMsg.className = 'success';
+      setTimeout(closeForm, 1800);
+    }
+  });
+
+  // ---- Φόρτωση εγκεκριμένων αναφορών ----
+  async function loadSightings() {
+    const { data, error } = await supabaseClient
+      .from('sightings')
+      .select('*')
+      .eq('approved', true)
+      .order('sighting_date', { ascending: false });
+
+    if (error) {
+      console.error('Σφάλμα φόρτωσης:', error.message);
+      return;
+    }
+
+    markersLayer.clearLayers();
+    counterNumber.textContent = data.length;
+
+    data.forEach((row) => {
+      const marker = L.circleMarker([row.latitude, row.longitude], {
+        radius: 8,
+        fillColor: '#e8633a',
+        color: '#0a2540',
+        weight: 1.5,
+        fillOpacity: 0.85,
+      });
+
+      const dateStr = row.sighting_date
+        ? new Date(row.sighting_date).toLocaleDateString('el-GR')
+        : 'άγνωστη ημερομηνία';
+
+      const photoHtml = row.photo_url
+        ? `<img class="popup-photo" src="${row.photo_url}" alt="Φωτογραφία αναφοράς">`
+        : '';
+
+      marker.bindPopup(`
+        <b>${row.location_name || 'Άγνωστη τοποθεσία'}</b><br>
+        📅 ${dateStr}<br>
+        ${row.description ? `<i>${row.description}</i>` : ''}
+        ${photoHtml}
+      `);
+
+      markersLayer.addLayer(marker);
+    });
+  }
+
+  loadSightings();
+
+  // ---- Real-time: ανανέωση όταν προστίθεται νέα εγκεκριμένη αναφορά ----
+  supabaseClient
+    .channel('sightings-changes')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'sightings' }, () => {
+      loadSightings();
+    })
+    .subscribe();
+</script>
+
+</body>
+</html>
