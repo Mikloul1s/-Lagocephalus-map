@@ -11,6 +11,18 @@
   <img src="preview.png" alt="Προεπισκόπηση του χάρτη" width="700">
 </p>
 
+## 📱 Socials
+
+<p align="center">
+  <a href="https://www.tiktok.com/@lagocephalus">
+    <img src="https://img.shields.io/badge/TikTok-@lagocephalus-black?style=for-the-badge&logo=tiktok" alt="TikTok">
+  </a>
+  &nbsp;
+  <a href="#">
+    <img src="https://img.shields.io/badge/Instagram-Coming%20Soon-E4405F?style=for-the-badge&logo=instagram&logoColor=white" alt="Instagram">
+  </a>
+</p>
+
 ## Features
 
 Ο καθένας μπορεί να σημειώσει στον χάρτη πού είδε λαγοκέφαλο — με τοποθεσία, ημερομηνία, περιγραφή και προαιρετική φωτογραφία. Κάθε αναφορά ελέγχεται πριν εμφανιστεί δημόσια, ώστε ο χάρτης να παραμένει αξιόπιστος.
