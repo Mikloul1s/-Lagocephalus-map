@@ -26,7 +26,7 @@
 | Κομμάτι | Τεχνολογία |
 |---|---|
 | Χάρτης | [Leaflet.js](https://leafletjs.com/) + [Leaflet.markercluster](https://github.com/Leaflet/Leaflet.markercluster) |
-| Βάση δεδομένων & Auth | [Supabase](https://supabase.com/) (PostgreSQL, Row Level Security, Storage, Realtime) |
+| Βάση δεδομένων & Auth | [Supabase](https://supabase.com/)
 | Frontend | Καθαρό HTML / CSS / JavaScript — χωρίς frameworks |
 | Hosting | GitHub Pages |
 
