@@ -34,7 +34,9 @@
   html, body {
     margin: 0;
     padding: 0;
-    height: 100%;
+    height: 100vh;
+    width: 100%;
+    overflow: hidden;
     font-family: 'Georgia', 'Times New Roman', serif;
     background: var(--foam);
     color: var(--deep-sea);
@@ -55,6 +57,7 @@
     flex-wrap: wrap;
     gap: 8px;
     border-bottom: 3px solid var(--coral);
+    flex-shrink: 0;
   }
 
   header h1 {
@@ -84,10 +87,16 @@
 
   main {
     flex: 1;
+    min-height: 0;
     position: relative;
   }
 
   #map {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     width: 100%;
     height: 100%;
     background: #bcdcec;
@@ -140,6 +149,29 @@
   #add-btn:active { transform: scale(0.97); }
   #add-btn:focus-visible { outline: 3px solid var(--warn-yellow); outline-offset: 2px; }
 
+  #add-catch-btn {
+    position: absolute;
+    bottom: 88px;
+    right: 24px;
+    z-index: 1000;
+    background: var(--deep-sea);
+    color: var(--foam);
+    border: 1.5px solid rgba(246,243,234,0.3);
+    border-radius: 999px;
+    padding: 12px 20px;
+    font-family: -apple-system, system-ui, sans-serif;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(10,37,64,0.35);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background 0.15s ease, transform 0.1s ease;
+  }
+  #add-catch-btn:hover { background: var(--mid-sea); }
+  #add-catch-btn:active { transform: scale(0.97); }
+
   /* Instruction banner shown while picking a location */
   #pick-banner {
     position: absolute;
@@ -159,6 +191,18 @@
 
   /* Modal form */
   #overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(10,37,64,0.55);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    padding: 16px;
+    overflow-y: auto;
+  }
+
+  #catch-overlay {
     position: fixed;
     inset: 0;
     background: rgba(10,37,64,0.55);
@@ -515,13 +559,11 @@
     <button class="ranking-toggle" id="fishers-toggle">🎣 Fishers List <span class="arrow">▾</span></button>
     <div class="ranking-list" id="fishers-list">
       <div class="ranking-empty">Φόρτωση...</div>
-      <div class="ranking-footer">
-        <button id="open-catch-form-btn">+ Δήλωσε αλίευμα</button>
-      </div>
     </div>
   </div>
 
   <div id="pick-banner">Πάτησε ένα σημείο στον χάρτη όπου είδες τον λαγοκέφαλο</div>
+  <button id="add-catch-btn">🎣 Δήλωσε αλίευμα</button>
   <button id="add-btn">📍 Νέα αναφορά</button>
 </main>
 
@@ -644,27 +686,42 @@
 
   const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  // ---- Γεωγραφικά όρια: κλειδώνουμε τον χάρτη γύρω από την Ελλάδα ----
-  // [South-West corner, North-East corner]
-  const GREECE_BOUNDS = [
+  // ---- Γεωγραφικά όρια ----
+  // VIEW_BOUNDS: πόσο μπορεί να κάνει pan/zoom-out ο χρήστης (ευρύτερο, ώστε να γεμίζει
+  // οπτικά την οθόνη σε κάθε αναλογία παραθύρου, χωρίς να αφήνει κενό φόντο)
+  const VIEW_BOUNDS = [
+    [22.0, 11.0],   // νοτιοδυτικά (μέσα στην Αφρική/Λιβύη)
+    [44.5, 36.5]    // βορειοανατολικά (πάνω από Β. Ελλάδα, μέσα στην ενδοχώρα Τουρκίας)
+  ];
+
+  // PIN_BOUNDS: πού επιτρέπεται να τοποθετηθεί πινέζα αναφοράς (μόνο Ελλάδα/ελληνικές θάλασσες)
+  const PIN_BOUNDS = [
     [33.5, 18.5],   // νοτιοδυτικά (κάτω από την Κρήτη, δυτικά του Ιονίου)
     [42.5, 30.5]    // βορειοανατολικά (πάνω από Έβρο, ανατολικά Ρόδου)
   ];
 
   const map = L.map('map', {
     zoomControl: true,
-    maxBounds: GREECE_BOUNDS,
+    maxBounds: VIEW_BOUNDS,
     maxBoundsViscosity: 0.9, // "ελαστική αντίσταση" όταν ο χρήστης σπρώχνει έξω από τα όρια
-    minZoom: 6
+    minZoom: 5
   }).setView([38.5, 24.5], 6.4);
 
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; OpenStreetMap συνεισφέροντες',
     maxZoom: 18,
-    minZoom: 6
+    minZoom: 5
   }).addTo(map);
 
-  map.fitBounds(GREECE_BOUNDS);
+  map.fitBounds(PIN_BOUNDS);
+
+  // ---- Fix για γνωστό Leaflet bug: ο χάρτης μερικές φορές δεν "βλέπει" το πραγματικό
+  // ύψος του container του στην πρώτη φόρτωση, αφήνοντας κενό χώρο. Το invalidateSize()
+  // αναγκάζει τον Leaflet να ξανaμετρήσει το container.
+  setTimeout(() => map.invalidateSize(), 100);
+  setTimeout(() => map.invalidateSize(), 500);
+  window.addEventListener('resize', () => map.invalidateSize());
+  window.addEventListener('load', () => map.invalidateSize());
 
   // ---- Clustering κουκίδων ----
   const markersLayer = L.markerClusterGroup({
@@ -696,11 +753,21 @@
     map.getContainer().style.cursor = 'crosshair';
   });
 
+  // Leaflet LatLngBounds object για εύκολο .contains() έλεγχο
+  const pinBoundsObj = L.latLngBounds(PIN_BOUNDS);
+
   map.on('click', (e) => {
     if (!pickMode) return;
+
+    if (!pinBoundsObj.contains(e.latlng)) {
+      pickBanner.textContent = 'Διάλεξε σημείο μέσα στην ελληνική επικράτεια/θάλασσα';
+      return; // αγνοούμε το κλικ, ο χρήστης παραμένει σε pick mode
+    }
+
     pendingLatLng = e.latlng;
     pickMode = false;
     pickBanner.style.display = 'none';
+    pickBanner.textContent = 'Πάτησε ένα σημείο στον χάρτη όπου είδες τον λαγοκέφαλο';
     addBtn.style.display = 'flex';
     map.getContainer().style.cursor = '';
     openForm(e.latlng);
@@ -888,7 +955,7 @@
   const loggedInEl = document.getElementById('auth-logged-in');
   const welcomeName = document.getElementById('welcome-name');
   const logoutBtnHeader = document.getElementById('logout-btn-header');
-  const openCatchFormBtn = document.getElementById('open-catch-form-btn');
+  const openCatchFormBtn = document.getElementById('add-catch-btn');
 
   let authMode = 'login';
   let currentUser = null;
@@ -1207,7 +1274,7 @@
       .eq('approved', true);
 
     if (error) {
-      fishersList.innerHTML = '<div class="ranking-empty">Σφάλμα φόρτωσης.</div>' + fishersFooterHtml();
+      fishersList.innerHTML = '<div class="ranking-empty">Σφάλμα φόρτωσης.</div>';
       return;
     }
 
@@ -1218,7 +1285,7 @@
 
     const userIds = Object.keys(totals);
     if (userIds.length === 0) {
-      fishersList.innerHTML = '<div class="ranking-empty">Κανένα αλίευμα ακόμα.</div>' + fishersFooterHtml();
+      fishersList.innerHTML = '<div class="ranking-empty">Κανένα αλίευμα ακόμα.</div>';
       return;
     }
 
@@ -1241,21 +1308,8 @@
         <span class="name">${escapeHtml(entry.name)}</span>
         <span class="score">${entry.kilos.toFixed(1)}kg</span>
       </div>
-    `).join('') + fishersFooterHtml();
+    `).join('');
   }
-
-  function fishersFooterHtml() {
-    return `<div class="ranking-footer"><button id="open-catch-form-btn-2">+ Δήλωσε αλίευμα</button></div>`;
-  }
-
-  // Event delegation γιατί το footer button ξαναγράφεται κάθε φορά
-  fishersList.addEventListener('click', (e) => {
-    if (e.target.id === 'open-catch-form-btn-2') {
-      if (!requireAuth()) return;
-      catchStatusMsg.style.display = 'none';
-      catchOverlay.style.display = 'flex';
-    }
-  });
 
   function escapeHtml(str) {
     if (!str) return '';
