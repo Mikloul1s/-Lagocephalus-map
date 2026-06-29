@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Χάρτης Λαγόκεφαλου — Ελλάδα</title>
+<title>Χάρτης Λαγοκέφαλου — Ελλάδα</title>
 
 <!-- Leaflet (βιβλιοθήκη χαρτών) -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
@@ -99,17 +99,19 @@
     top: 16px;
     left: 16px;
     z-index: 1000;
-    background: rgba(10,37,64,0.92);
-    color: var(--foam);
+    background: var(--foam);
+    color: var(--deep-sea);
     font-family: -apple-system, system-ui, sans-serif;
     padding: 10px 16px;
     border-radius: 8px;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.3);
     font-size: 0.85rem;
+    font-weight: 700;
+    border: 2px solid #d6271e;
   }
   #counter-badge strong {
-    font-size: 1.15rem;
-    color: var(--coral);
+    font-size: 1.2rem;
+    color: #d6271e;
     font-family: Georgia, serif;
   }
 
@@ -292,6 +294,183 @@
     font-weight: 700;
   }
 
+  /* ---- Auth widget (header) ---- */
+  #auth-widget {
+    font-family: -apple-system, system-ui, sans-serif;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  #auth-widget button {
+    font-family: inherit;
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 999px;
+    border: 1.5px solid rgba(246,243,234,0.4);
+    background: transparent;
+    color: var(--foam);
+    cursor: pointer;
+  }
+  #auth-widget button:hover { background: rgba(246,243,234,0.1); }
+  #auth-widget .welcome { color: rgba(246,243,234,0.85); }
+
+  /* ---- Ranking dropdown panels ---- */
+  .ranking-panel {
+    position: absolute;
+    top: 16px;
+    z-index: 1000;
+    font-family: -apple-system, system-ui, sans-serif;
+  }
+  #hunters-panel { left: 16px; top: 64px; }
+  #fishers-panel { right: 16px; top: 16px; }
+
+  .ranking-toggle {
+    background: rgba(10,37,64,0.92);
+    color: var(--foam);
+    border: none;
+    border-radius: 8px;
+    padding: 9px 14px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    letter-spacing: 0.01em;
+  }
+  .ranking-toggle .arrow { font-size: 0.7rem; transition: transform 0.15s ease; }
+  .ranking-toggle.open .arrow { transform: rotate(180deg); }
+
+  .ranking-list {
+    display: none;
+    margin-top: 6px;
+    background: var(--foam);
+    border-radius: 8px;
+    box-shadow: 0 6px 22px rgba(0,0,0,0.3);
+    min-width: 230px;
+    max-height: 280px;
+    overflow-y: auto;
+  }
+  .ranking-list.open { display: block; }
+
+  .ranking-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--line);
+    font-size: 0.84rem;
+    color: var(--deep-sea);
+  }
+  .ranking-row:last-child { border-bottom: none; }
+  .ranking-row .rank {
+    font-family: Georgia, serif;
+    font-weight: 700;
+    color: var(--coral);
+    width: 20px;
+    flex-shrink: 0;
+  }
+  .ranking-row .name { flex: 1; }
+  .ranking-row .score {
+    font-weight: 700;
+    font-size: 0.8rem;
+    color: var(--text-soft);
+  }
+  .ranking-empty {
+    padding: 14px;
+    font-size: 0.8rem;
+    color: var(--text-soft);
+    text-align: center;
+  }
+
+  /* ---- Fishers submit button (μέσα στο panel) ---- */
+  .ranking-footer {
+    padding: 10px 14px;
+    border-top: 1.5px solid var(--line);
+  }
+  .ranking-footer button {
+    width: 100%;
+    background: var(--coral);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 8px;
+    font-family: inherit;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .ranking-footer button:hover { background: var(--coral-dark); }
+
+  /* ---- Auth modal ---- */
+  #auth-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(10,37,64,0.55);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 2500;
+    padding: 16px;
+  }
+  #auth-card {
+    background: var(--foam);
+    border-radius: 10px;
+    max-width: 360px;
+    width: 100%;
+    padding: 26px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    font-family: -apple-system, system-ui, sans-serif;
+  }
+  #auth-card h2 {
+    font-family: Georgia, serif;
+    font-size: 1.2rem;
+    margin: 0 0 16px;
+    color: var(--deep-sea);
+  }
+  #auth-tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  #auth-tabs button {
+    flex: 1;
+    font-family: inherit;
+    font-size: 0.82rem;
+    font-weight: 600;
+    padding: 8px;
+    border-radius: 6px;
+    border: 1.5px solid var(--line);
+    background: white;
+    color: var(--text-soft);
+    cursor: pointer;
+  }
+  #auth-tabs button.active {
+    background: var(--deep-sea);
+    color: var(--foam);
+    border-color: var(--deep-sea);
+  }
+  #auth-error {
+    font-size: 0.82rem;
+    color: var(--coral-dark);
+    margin-top: 10px;
+    display: none;
+  }
+  #auth-success {
+    font-size: 0.82rem;
+    color: #1d7a4c;
+    margin-top: 10px;
+    display: none;
+  }
+
+  /* ---- Fisher catch form ---- */
+  #catch-list-display {
+    margin-top: 6px;
+  }
+
   footer {
     background: var(--deep-sea);
     color: rgba(246,243,234,0.55);
@@ -305,16 +484,44 @@
 <body>
 
 <header>
-  <h1>Χάρτης Λαγόκεφαλου
+  <h1>Χάρτης Λαγοκέφαλου
     <span class="latin">Lagocephalus sceleratus — αναφορές πολιτών</span>
   </h1>
-  <div class="tagline">Σημείωσε πού είδες λαγόκεφαλο. Κάθε αναφορά ελέγχεται πριν εμφανιστεί δημόσια.</div>
+  <div id="auth-widget">
+    <span id="auth-logged-out">
+      <button id="open-auth-btn">Σύνδεση / Εγγραφή</button>
+    </span>
+    <span id="auth-logged-in" style="display:none;">
+      <span class="welcome">Καλώς ήρθες, <strong id="welcome-name"></strong></span>
+      <button id="logout-btn-header">Αποσύνδεση</button>
+    </span>
+  </div>
 </header>
 
 <main>
   <div id="map"></div>
-  <div id="counter-badge"><strong id="counter-number">—</strong> επιβεβαιωμένες αναφορές</div>
-  <div id="pick-banner">Πάτησε ένα σημείο στον χάρτη όπου είδες τον λαγόκεφαλο</div>
+  <div id="counter-badge"><strong id="counter-number">—</strong> Επιβεβαιωμένες αναφορές</div>
+
+  <!-- Head Hunters List (αριστερά) -->
+  <div class="ranking-panel" id="hunters-panel">
+    <button class="ranking-toggle" id="hunters-toggle">🎯 Head Hunters List <span class="arrow">▾</span></button>
+    <div class="ranking-list" id="hunters-list">
+      <div class="ranking-empty">Φόρτωση...</div>
+    </div>
+  </div>
+
+  <!-- Fishers List (δεξιά) -->
+  <div class="ranking-panel" id="fishers-panel">
+    <button class="ranking-toggle" id="fishers-toggle">🎣 Fishers List <span class="arrow">▾</span></button>
+    <div class="ranking-list" id="fishers-list">
+      <div class="ranking-empty">Φόρτωση...</div>
+      <div class="ranking-footer">
+        <button id="open-catch-form-btn">+ Δήλωσε αλίευμα</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="pick-banner">Πάτησε ένα σημείο στον χάρτη όπου είδες τον λαγοκέφαλο</div>
   <button id="add-btn">📍 Νέα αναφορά</button>
 </main>
 
@@ -355,6 +562,73 @@
       </div>
 
       <div id="status-msg"></div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal σύνδεσης / εγγραφής -->
+<div id="auth-overlay">
+  <div id="auth-card">
+    <h2 id="auth-title">Σύνδεση</h2>
+    <div id="auth-tabs">
+      <button type="button" class="active" data-mode="login">Σύνδεση</button>
+      <button type="button" data-mode="signup">Εγγραφή</button>
+    </div>
+
+    <form id="auth-form">
+      <div class="field" id="display-name-field" style="display:none;">
+        <label for="display_name">Όνομα χρήστη (θα φαίνεται στα rankings)</label>
+        <input type="text" id="display_name" placeholder="π.χ. Γιώργος Θ.">
+      </div>
+      <div class="field">
+        <label for="auth-email">Email</label>
+        <input type="email" id="auth-email" required autocomplete="username">
+      </div>
+      <div class="field">
+        <label for="auth-password">Κωδικός</label>
+        <input type="password" id="auth-password" required autocomplete="current-password" minlength="6">
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" id="auth-cancel-btn">Άκυρο</button>
+        <button type="submit" class="btn btn-primary" id="auth-submit-btn">Σύνδεση</button>
+      </div>
+
+      <div id="auth-error"></div>
+      <div id="auth-success"></div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal δήλωσης αλιεύματος -->
+<div id="catch-overlay">
+  <div id="form-card">
+    <h2>Δήλωσε αλίευμα</h2>
+    <div class="coords">Χρειάζεται αποδεικτικό από αρμόδια αρχή (φωτό ή PDF)</div>
+
+    <form id="catch-form">
+      <div class="field">
+        <label for="catch_kilos">Κιλά</label>
+        <input type="number" id="catch_kilos" step="0.1" min="0.1" required placeholder="π.χ. 12.5">
+      </div>
+
+      <div class="field">
+        <label for="catch_notes">Σημειώσεις (προαιρετικό)</label>
+        <textarea id="catch_notes" placeholder="π.χ. Περιοχή, ημερομηνία αλίευσης..."></textarea>
+      </div>
+
+      <div class="field">
+        <label for="catch_proof">Αποδεικτικό αρχείο (φωτό ή PDF)</label>
+        <input type="file" id="catch_proof" accept="image/jpeg,image/png,image/webp,application/pdf" required>
+        <div class="hint">Μέγιστο μέγεθος 5MB · JPG, PNG, WEBP ή PDF</div>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" id="catch-cancel-btn">Άκυρο</button>
+        <button type="submit" class="btn btn-primary" id="catch-submit-btn">Υποβολή</button>
+      </div>
+
+      <div id="catch-status-msg"></div>
     </form>
   </div>
 </div>
@@ -415,6 +689,7 @@
   const counterNumber = document.getElementById('counter-number');
 
   addBtn.addEventListener('click', () => {
+    if (!requireAuth()) return;
     pickMode = true;
     pickBanner.style.display = 'block';
     addBtn.style.display = 'none';
@@ -531,6 +806,7 @@
       sighting_date: document.getElementById('sighting_date').value || null,
       description: document.getElementById('description').value || null,
       photo_url: photoUrl,
+      user_id: currentUser ? currentUser.id : null,
     };
 
     const { error } = await supabaseClient.from('sightings').insert(payload);
@@ -594,12 +870,408 @@
 
   loadSightings();
 
-  // ---- Real-time: ανανέωση όταν προστίθεται νέα εγκεκριμένη αναφορά ----
+  // ===================================================================
+  // ============ AUTH (Σύνδεση / Εγγραφή χρηστών) ====================
+  // ===================================================================
+
+  const authOverlay = document.getElementById('auth-overlay');
+  const authForm = document.getElementById('auth-form');
+  const authTabs = document.querySelectorAll('#auth-tabs button');
+  const displayNameField = document.getElementById('display-name-field');
+  const authTitle = document.getElementById('auth-title');
+  const authSubmitBtn = document.getElementById('auth-submit-btn');
+  const authError = document.getElementById('auth-error');
+  const authSuccess = document.getElementById('auth-success');
+  const openAuthBtn = document.getElementById('open-auth-btn');
+  const authCancelBtn = document.getElementById('auth-cancel-btn');
+  const loggedOutEl = document.getElementById('auth-logged-out');
+  const loggedInEl = document.getElementById('auth-logged-in');
+  const welcomeName = document.getElementById('welcome-name');
+  const logoutBtnHeader = document.getElementById('logout-btn-header');
+  const openCatchFormBtn = document.getElementById('open-catch-form-btn');
+
+  let authMode = 'login';
+  let currentUser = null;
+  let currentProfile = null;
+
+  function openAuthModal() {
+    authError.style.display = 'none';
+    authSuccess.style.display = 'none';
+    authOverlay.style.display = 'flex';
+  }
+  function closeAuthModal() {
+    authOverlay.style.display = 'none';
+    authForm.reset();
+  }
+
+  openAuthBtn.addEventListener('click', openAuthModal);
+  authCancelBtn.addEventListener('click', closeAuthModal);
+  authOverlay.addEventListener('click', (e) => { if (e.target === authOverlay) closeAuthModal(); });
+
+  authTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      authTabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      authMode = tab.dataset.mode;
+      displayNameField.style.display = authMode === 'signup' ? 'block' : 'none';
+      authTitle.textContent = authMode === 'signup' ? 'Εγγραφή' : 'Σύνδεση';
+      authSubmitBtn.textContent = authMode === 'signup' ? 'Εγγραφή' : 'Σύνδεση';
+      authError.style.display = 'none';
+      authSuccess.style.display = 'none';
+    });
+  });
+
+  authForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    authError.style.display = 'none';
+    authSuccess.style.display = 'none';
+    authSubmitBtn.disabled = true;
+
+    const email = document.getElementById('auth-email').value.trim();
+    const password = document.getElementById('auth-password').value;
+    const displayNameVal = document.getElementById('display_name').value.trim();
+
+    if (authMode === 'signup') {
+      if (!displayNameVal) {
+        authError.textContent = 'Διάλεξε ένα όνομα χρήστη.';
+        authError.style.display = 'block';
+        authSubmitBtn.disabled = false;
+        return;
+      }
+
+      const { data, error } = await supabaseClient.auth.signUp({ email, password });
+
+      if (error) {
+        authError.textContent = 'Σφάλμα εγγραφής: ' + error.message;
+        authError.style.display = 'block';
+        authSubmitBtn.disabled = false;
+        return;
+      }
+
+      // Δημιουργία δημόσιου προφίλ
+      if (data.user) {
+        const { error: profileError } = await supabaseClient.from('profiles').insert({
+          id: data.user.id,
+          display_name: displayNameVal,
+        });
+        if (profileError) {
+          console.error('Σφάλμα δημιουργίας προφίλ:', profileError.message);
+        }
+      }
+
+      authSubmitBtn.disabled = false;
+
+      if (data.session) {
+        // Έγινε αυτόματα login (email confirmation off)
+        closeAuthModal();
+        await refreshAuthState();
+      } else {
+        authSuccess.textContent = 'Η εγγραφή έγινε! Έλεγξε το email σου για επιβεβαίωση, μετά συνδέσου.';
+        authSuccess.style.display = 'block';
+      }
+
+    } else {
+      const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+      authSubmitBtn.disabled = false;
+
+      if (error) {
+        authError.textContent = 'Λάθος email ή κωδικός.';
+        authError.style.display = 'block';
+        return;
+      }
+
+      closeAuthModal();
+      await refreshAuthState();
+    }
+  });
+
+  logoutBtnHeader.addEventListener('click', async () => {
+    await supabaseClient.auth.signOut();
+    currentUser = null;
+    currentProfile = null;
+    updateAuthUI();
+  });
+
+  async function refreshAuthState() {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (session) {
+      currentUser = session.user;
+      const { data: profile } = await supabaseClient
+        .from('profiles')
+        .select('*')
+        .eq('id', currentUser.id)
+        .single();
+      currentProfile = profile;
+    } else {
+      currentUser = null;
+      currentProfile = null;
+    }
+    updateAuthUI();
+  }
+
+  function updateAuthUI() {
+    if (currentUser && currentProfile) {
+      loggedOutEl.style.display = 'none';
+      loggedInEl.style.display = 'inline-flex';
+      welcomeName.textContent = currentProfile.display_name;
+    } else {
+      loggedOutEl.style.display = 'inline-flex';
+      loggedInEl.style.display = 'none';
+    }
+  }
+
+  // Helper: ζητά login αν ο χρήστης δεν είναι συνδεδεμένος. Επιστρέφει true αν προχωράμε.
+  function requireAuth(actionLabel) {
+    if (!currentUser) {
+      openAuthModal();
+      return false;
+    }
+    return true;
+  }
+
+  refreshAuthState();
+
+  // ===================================================================
+  // ============ HEAD HUNTERS LIST (ranking αναφορών) =================
+  // ===================================================================
+
+  const huntersToggle = document.getElementById('hunters-toggle');
+  const huntersList = document.getElementById('hunters-list');
+
+  huntersToggle.addEventListener('click', () => {
+    huntersToggle.classList.toggle('open');
+    huntersList.classList.toggle('open');
+  });
+
+  async function loadHuntersRanking() {
+    // Παίρνουμε όλες τις εγκεκριμένες αναφορές με user_id, μετράμε ανά χρήστη
+    const { data, error } = await supabaseClient
+      .from('sightings')
+      .select('user_id')
+      .eq('approved', true)
+      .not('user_id', 'is', null);
+
+    if (error) {
+      huntersList.innerHTML = '<div class="ranking-empty">Σφάλμα φόρτωσης.</div>';
+      return;
+    }
+
+    const counts = {};
+    data.forEach(row => {
+      counts[row.user_id] = (counts[row.user_id] || 0) + 1;
+    });
+
+    const userIds = Object.keys(counts);
+    if (userIds.length === 0) {
+      huntersList.innerHTML = '<div class="ranking-empty">Καμία αναφορά ακόμα.</div>';
+      return;
+    }
+
+    const { data: profilesData } = await supabaseClient
+      .from('profiles')
+      .select('id, display_name')
+      .in('id', userIds);
+
+    const nameMap = {};
+    (profilesData || []).forEach(p => { nameMap[p.id] = p.display_name; });
+
+    const ranked = userIds
+      .map(id => ({ id, name: nameMap[id] || 'Ανώνυμος', count: counts[id] }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10);
+
+    huntersList.innerHTML = ranked.map((entry, i) => `
+      <div class="ranking-row">
+        <span class="rank">${i + 1}.</span>
+        <span class="name">${escapeHtml(entry.name)}</span>
+        <span class="score">${entry.count}</span>
+      </div>
+    `).join('');
+  }
+
+  // ===================================================================
+  // ============ FISHERS LIST (ranking κιλών) ==========================
+  // ===================================================================
+
+  const fishersToggle = document.getElementById('fishers-toggle');
+  const fishersList = document.getElementById('fishers-list');
+  const catchOverlay = document.getElementById('catch-overlay');
+  const catchForm = document.getElementById('catch-form');
+  const catchStatusMsg = document.getElementById('catch-status-msg');
+  const catchCancelBtn = document.getElementById('catch-cancel-btn');
+  const catchSubmitBtn = document.getElementById('catch-submit-btn');
+
+  const MAX_PROOF_BYTES = 5 * 1024 * 1024; // 5MB
+  const PROOF_BUCKET = 'catch-proofs';
+
+  fishersToggle.addEventListener('click', () => {
+    fishersToggle.classList.toggle('open');
+    fishersList.classList.toggle('open');
+  });
+
+  openCatchFormBtn.addEventListener('click', () => {
+    if (!requireAuth()) return;
+    catchStatusMsg.style.display = 'none';
+    catchOverlay.style.display = 'flex';
+  });
+
+  catchCancelBtn.addEventListener('click', closeCatchForm);
+  catchOverlay.addEventListener('click', (e) => { if (e.target === catchOverlay) closeCatchForm(); });
+
+  function closeCatchForm() {
+    catchOverlay.style.display = 'none';
+    catchForm.reset();
+  }
+
+  catchForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!currentUser) { openAuthModal(); return; }
+
+    const proofInput = document.getElementById('catch_proof');
+    const file = proofInput.files[0];
+
+    if (!file) {
+      catchStatusMsg.textContent = 'Χρειάζεται αποδεικτικό αρχείο.';
+      catchStatusMsg.className = 'error';
+      catchStatusMsg.style.display = 'block';
+      return;
+    }
+
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
+    if (!allowedTypes.includes(file.type)) {
+      catchStatusMsg.textContent = 'Επιτρέπονται μόνο JPG, PNG, WEBP ή PDF.';
+      catchStatusMsg.className = 'error';
+      catchStatusMsg.style.display = 'block';
+      return;
+    }
+
+    if (file.size > MAX_PROOF_BYTES) {
+      catchStatusMsg.textContent = 'Το αρχείο ξεπερνά το όριο των 5MB.';
+      catchStatusMsg.className = 'error';
+      catchStatusMsg.style.display = 'block';
+      return;
+    }
+
+    catchSubmitBtn.disabled = true;
+    catchSubmitBtn.textContent = 'Υποβολή...';
+    catchStatusMsg.style.display = 'none';
+
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${crypto.randomUUID()}.${fileExt}`;
+
+    const { error: uploadError } = await supabaseClient.storage
+      .from(PROOF_BUCKET)
+      .upload(fileName, file);
+
+    if (uploadError) {
+      catchSubmitBtn.disabled = false;
+      catchSubmitBtn.textContent = 'Υποβολή';
+      catchStatusMsg.textContent = 'Σφάλμα ανεβάσματος: ' + uploadError.message;
+      catchStatusMsg.className = 'error';
+      catchStatusMsg.style.display = 'block';
+      return;
+    }
+
+    const { data: publicUrlData } = supabaseClient.storage
+      .from(PROOF_BUCKET)
+      .getPublicUrl(fileName);
+
+    const payload = {
+      user_id: currentUser.id,
+      kilos: parseFloat(document.getElementById('catch_kilos').value),
+      notes: document.getElementById('catch_notes').value || null,
+      proof_file_url: publicUrlData.publicUrl,
+    };
+
+    const { error } = await supabaseClient.from('fisher_catches').insert(payload);
+
+    catchSubmitBtn.disabled = false;
+    catchSubmitBtn.textContent = 'Υποβολή';
+
+    if (error) {
+      catchStatusMsg.textContent = 'Κάτι πήγε στραβά: ' + error.message;
+      catchStatusMsg.className = 'error';
+      catchStatusMsg.style.display = 'block';
+    } else {
+      catchStatusMsg.textContent = 'Ευχαριστούμε! Θα ελεγχθεί πριν εμφανιστεί στη λίστα.';
+      catchStatusMsg.className = 'success';
+      catchStatusMsg.style.display = 'block';
+      setTimeout(closeCatchForm, 2000);
+    }
+  });
+
+  async function loadFishersRanking() {
+    const { data, error } = await supabaseClient
+      .from('fisher_catches')
+      .select('user_id, kilos')
+      .eq('approved', true);
+
+    if (error) {
+      fishersList.innerHTML = '<div class="ranking-empty">Σφάλμα φόρτωσης.</div>' + fishersFooterHtml();
+      return;
+    }
+
+    const totals = {};
+    data.forEach(row => {
+      totals[row.user_id] = (totals[row.user_id] || 0) + parseFloat(row.kilos);
+    });
+
+    const userIds = Object.keys(totals);
+    if (userIds.length === 0) {
+      fishersList.innerHTML = '<div class="ranking-empty">Κανένα αλίευμα ακόμα.</div>' + fishersFooterHtml();
+      return;
+    }
+
+    const { data: profilesData } = await supabaseClient
+      .from('profiles')
+      .select('id, display_name')
+      .in('id', userIds);
+
+    const nameMap = {};
+    (profilesData || []).forEach(p => { nameMap[p.id] = p.display_name; });
+
+    const ranked = userIds
+      .map(id => ({ id, name: nameMap[id] || 'Ανώνυμος', kilos: totals[id] }))
+      .sort((a, b) => b.kilos - a.kilos)
+      .slice(0, 10);
+
+    fishersList.innerHTML = ranked.map((entry, i) => `
+      <div class="ranking-row">
+        <span class="rank">${i + 1}.</span>
+        <span class="name">${escapeHtml(entry.name)}</span>
+        <span class="score">${entry.kilos.toFixed(1)}kg</span>
+      </div>
+    `).join('') + fishersFooterHtml();
+  }
+
+  function fishersFooterHtml() {
+    return `<div class="ranking-footer"><button id="open-catch-form-btn-2">+ Δήλωσε αλίευμα</button></div>`;
+  }
+
+  // Event delegation γιατί το footer button ξαναγράφεται κάθε φορά
+  fishersList.addEventListener('click', (e) => {
+    if (e.target.id === 'open-catch-form-btn-2') {
+      if (!requireAuth()) return;
+      catchStatusMsg.style.display = 'none';
+      catchOverlay.style.display = 'flex';
+    }
+  });
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  loadHuntersRanking();
+  loadFishersRanking();
+
+  // Real-time ανανέωση των rankings όταν αλλάζουν τα δεδομένα
   supabaseClient
-    .channel('sightings-changes')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'sightings' }, () => {
-      loadSightings();
-    })
+    .channel('rankings-changes')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'sightings' }, () => loadHuntersRanking())
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'fisher_catches' }, () => loadFishersRanking())
     .subscribe();
 </script>
 
