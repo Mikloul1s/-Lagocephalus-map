@@ -1,51 +1,35 @@
 # 🐡 Χάρτης Λαγοκέφαλου — Ελλάδα
 
-**Lagocephalus sceleratus sightings map** · Ένα crowdsourced εργαλείο καταγραφής εμφανίσεων λαγόκεφαλου στις ελληνικές παραλίες, με ζωντανό χάρτη και σύστημα έγκρισης αναφορών.
+**Lagocephalus sceleratus sightings map** · Ένα crowdsourced εργαλείο καταγραφής εμφανίσεων λαγοκέφαλου στις ελληνικές παραλίες, με ζωντανό χάρτη και σύστημα έγκρισης αναφορών.
 
-[![Δες τον χάρτη](https://img.shields.io/badge/%F0%9F%97%BA%EF%B8%8F_Δες_τον_χάρτη-e8633a?style=for-the-badge)](https://mikloul1s.github.io/-Lagocephalus-map/)
+[!\[Δες τον χάρτη](https://img.shields.io/badge/%F0%9F%97%BA%EF%B8%8F\_Δες\_τον\_χάρτη-e8633a?style=for-the-badge)](https://mikloul1s.github.io/-Lagocephalus-map/)
 
 <br>
 
-
-<p align="center">
-  <img src="preview.png" alt="Προεπισκόπηση του χάρτη" width="700">
-</p>
-
-## 📱 Socials
-
-<p align="center">
-  <a href="https://www.tiktok.com/@lagocephalus">
-    <img src="https://img.shields.io/badge/TikTok-@lagocephalus-black?style=for-the-badge&logo=tiktok" alt="TikTok">
-  </a>
-  &nbsp;
-  <a href="#">
-    <img src="https://img.shields.io/badge/Instagram-Coming%20Soon-E4405F?style=for-the-badge&logo=instagram&logoColor=white" alt="Instagram">
-  </a>
-</p>
-
-## Features
+## Τι κάνει
 
 Ο καθένας μπορεί να σημειώσει στον χάρτη πού είδε λαγοκέφαλο — με τοποθεσία, ημερομηνία, περιγραφή και προαιρετική φωτογραφία. Κάθε αναφορά ελέγχεται πριν εμφανιστεί δημόσια, ώστε ο χάρτης να παραμένει αξιόπιστος.
 
-- 📍 **Διαδραστικός χάρτης** της Ελλάδας με ομαδοποίηση (clustering) κουκίδων
-- 📝 **Φόρμα αναφοράς**: τοποθεσία στον χάρτη, ημερομηνία, περιγραφή, φωτογραφία
-- ✅ **Σύστημα έγκρισης**: κάθε αναφορά ελέγχεται από διαχειριστή πριν δημοσιευτεί
-- 🔄 **Ζωντανές ενημερώσεις**: οι εγκεκριμένες αναφορές εμφανίζονται αυτόματα σε όλους, χωρίς refresh
-- 📊 **Μετρητής** συνολικών επιβεβαιωμένων αναφορών
+* 📍 **Διαδραστικός χάρτης** της Ελλάδας με ομαδοποίηση (clustering) κουκίδων
+* 📝 **Φόρμα αναφοράς**: τοποθεσία στον χάρτη, ημερομηνία, περιγραφή, φωτογραφία
+* ✅ **Σύστημα έγκρισης**: κάθε αναφορά ελέγχεται από διαχειριστή πριν δημοσιευτεί
+* 🔄 **Ζωντανές ενημερώσεις**: οι εγκεκριμένες αναφορές εμφανίζονται αυτόματα σε όλους, χωρίς refresh
+* 📊 **Μετρητής** συνολικών επιβεβαιωμένων αναφορών
 
 ## Τεχνολογίες
 
-| Κομμάτι | Τεχνολογία |
-|---|---|
-| Χάρτης | [Leaflet.js](https://leafletjs.com/) + [Leaflet.markercluster](https://github.com/Leaflet/Leaflet.markercluster) |
-| Βάση δεδομένων & Auth | [Supabase](https://supabase.com/)
-| Frontend | Καθαρό HTML / CSS / JavaScript — χωρίς frameworks |
-| Hosting | GitHub Pages |
+|Κομμάτι|Τεχνολογία|
+|-|-|
+|Χάρτης|[Leaflet.js](https://leafletjs.com/) + [Leaflet.markercluster](https://github.com/Leaflet/Leaflet.markercluster)|
+|Βάση δεδομένων \& Auth|[Supabase](https://supabase.com/) (PostgreSQL, Row Level Security, Storage, Realtime)|
+|Frontend|Καθαρό HTML / CSS / JavaScript |
+|Hosting|GitHub Pages|
 
 ## Γιατί το έφτιαξα
 
 Στην πανδημία υπήρχαν ζωντανοί χάρτες κρουσμάτων COVID σε πραγματικό χρόνο. Σκέφτηκα να φτιάξω κάτι αντίστοιχο, αλλά για ένα πρόβλημα που αγγίζει τις ελληνικές θάλασσες: τον λαγοκέφαλο, ένα δηλητηριώδες ξενικό είδος που εξαπλώνεται στο Αιγαίο και το Ιόνιο. Είναι το πρώτο μου project πάνω σε web development.
 
----
+\---
 
 <p align="center"><i>Μη επίσημο, εθελοντικό εργαλείο — δεν αντικαθιστά το <a href="https://elnais.hcmr.gr/">ELNAIS</a> ή επιστημονικά δίκτυα παρακολούθησης.</i></p>
+
