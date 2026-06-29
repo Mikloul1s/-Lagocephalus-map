@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Διαχείριση Αναφορών — Λαγόκεφαλος</title>
+<title>Διαχείριση — Λαγοκέφαλος</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -59,7 +59,7 @@
   #logout-btn:hover { background: rgba(246,243,234,0.1); }
 
   main {
-    max-width: 720px;
+    max-width: 760px;
     margin: 0 auto;
     padding: 30px 20px 60px;
   }
@@ -110,6 +110,19 @@
     display: none;
   }
 
+  #not-admin-msg {
+    background: white;
+    border-radius: 10px;
+    padding: 30px;
+    max-width: 400px;
+    margin: 60px auto;
+    text-align: center;
+    box-shadow: 0 4px 18px rgba(10,37,64,0.1);
+    display: none;
+    color: var(--coral-dark);
+    font-size: 0.92rem;
+  }
+
   /* ---- Dashboard ---- */
   #dashboard { display: none; }
 
@@ -118,11 +131,38 @@
     font-size: 1.1rem;
     margin-bottom: 4px;
   }
-  #summary {
+  #summary, #summary-catches {
     font-size: 0.85rem;
     color: var(--text-soft);
-    margin-bottom: 22px;
+    margin-bottom: 18px;
   }
+
+  /* ---- Section tabs (Αναφορές / Αλιεύματα) ---- */
+  .section-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid var(--line);
+  }
+  .section-tab {
+    font-family: inherit;
+    font-size: 0.92rem;
+    font-weight: 700;
+    padding: 10px 18px;
+    border: none;
+    background: transparent;
+    color: var(--text-soft);
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+  }
+  .section-tab.active {
+    color: var(--deep-sea);
+    border-bottom-color: var(--coral);
+  }
+
+  .section-content { display: none; }
+  .section-content.active { display: block; }
 
   .card {
     background: white;
@@ -166,8 +206,16 @@
     margin: 8px 0;
     border: 1px solid var(--line);
   }
+  .proof-link {
+    display: inline-block;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--coral-dark);
+    margin: 8px 0;
+    text-decoration: underline;
+  }
 
-  .card-actions { display: flex; gap: 8px; }
+  .card-actions { display: flex; gap: 8px; flex-wrap: wrap; }
   .btn-approve, .btn-reject {
     font-family: inherit;
     font-size: 0.82rem;
@@ -192,7 +240,7 @@
   .badge.pending { background: rgba(232,99,58,0.15); color: var(--coral-dark); }
   .badge.approved { background: rgba(29,122,76,0.15); color: var(--approve-green); }
 
-  #empty-msg {
+  #empty-msg, #empty-msg-catches {
     text-align: center;
     color: var(--text-soft);
     padding: 40px 0;
@@ -225,7 +273,7 @@
 <body>
 
 <header>
-  <h1>🐡 Διαχείριση Αναφορών</h1>
+  <h1>🐡 Διαχείριση</h1>
   <button id="logout-btn">Αποσύνδεση</button>
 </header>
 
@@ -248,19 +296,47 @@
     </form>
   </div>
 
+  <!-- Μήνυμα όχι-admin -->
+  <div id="not-admin-msg">
+    Ο λογαριασμός σου συνδέθηκε επιτυχώς, αλλά δεν έχει δικαιώματα διαχειριστή.
+  </div>
+
   <!-- Dashboard -->
   <div id="dashboard">
-    <h2>Αναφορές</h2>
-    <div id="summary">Φόρτωση...</div>
 
-    <div class="toggle-row">
-      <button class="toggle-btn active" data-filter="pending">Εκκρεμείς</button>
-      <button class="toggle-btn" data-filter="approved">Εγκεκριμένες</button>
-      <button class="toggle-btn" data-filter="all">Όλες</button>
+    <div class="section-tabs">
+      <button class="section-tab active" data-section="sightings">📍 Αναφορές</button>
+      <button class="section-tab" data-section="catches">🎣 Αλιεύματα</button>
     </div>
 
-    <div id="list"></div>
-    <div id="empty-msg" style="display:none;">Δεν υπάρχουν αναφορές σε αυτή την κατηγορία.</div>
+    <!-- ===== Section: Αναφορές ===== -->
+    <div class="section-content active" id="section-sightings">
+      <div id="summary">Φόρτωση...</div>
+
+      <div class="toggle-row">
+        <button class="toggle-btn active" data-filter="pending">Εκκρεμείς</button>
+        <button class="toggle-btn" data-filter="approved">Εγκεκριμένες</button>
+        <button class="toggle-btn" data-filter="all">Όλες</button>
+      </div>
+
+      <div id="list"></div>
+      <div id="empty-msg" style="display:none;">Δεν υπάρχουν αναφορές σε αυτή την κατηγορία.</div>
+    </div>
+
+    <!-- ===== Section: Αλιεύματα ===== -->
+    <div class="section-content" id="section-catches">
+      <div id="summary-catches">Φόρτωση...</div>
+
+      <div class="toggle-row">
+        <button class="toggle-btn active" data-filter-catch="pending">Εκκρεμή</button>
+        <button class="toggle-btn" data-filter-catch="approved">Εγκεκριμένα</button>
+        <button class="toggle-btn" data-filter-catch="all">Όλα</button>
+      </div>
+
+      <div id="list-catches"></div>
+      <div id="empty-msg-catches" style="display:none;">Δεν υπάρχουν αλιεύματα σε αυτή την κατηγορία.</div>
+    </div>
+
   </div>
 
 </main>
@@ -274,39 +350,71 @@
   const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   const loginCard = document.getElementById('login-card');
+  const notAdminMsg = document.getElementById('not-admin-msg');
   const dashboard = document.getElementById('dashboard');
   const logoutBtn = document.getElementById('logout-btn');
   const loginForm = document.getElementById('login-form');
   const loginBtn = document.getElementById('login-btn');
   const loginError = document.getElementById('login-error');
+
+  // --- Αναφορές (sightings) ---
   const listEl = document.getElementById('list');
   const summaryEl = document.getElementById('summary');
   const emptyMsg = document.getElementById('empty-msg');
-
   let currentFilter = 'pending';
   let allRows = [];
 
-  // ---- Έλεγχος αν είμαστε ήδη συνδεδεμένοι (π.χ. μετά από refresh) ----
+  // --- Αλιεύματα (catches) ---
+  const listCatchesEl = document.getElementById('list-catches');
+  const summaryCatchesEl = document.getElementById('summary-catches');
+  const emptyMsgCatches = document.getElementById('empty-msg-catches');
+  let currentCatchFilter = 'pending';
+  let allCatchRows = [];
+  let profileNameMap = {};
+
+  // ---- Έλεγχος session + admin status ----
   async function checkSession() {
     const { data: { session } } = await supabaseClient.auth.getSession();
-    if (session) {
-      showDashboard();
-    } else {
+    if (!session) {
       showLogin();
+      return;
     }
+
+    const { data: profile, error } = await supabaseClient
+      .from('profiles')
+      .select('is_admin')
+      .eq('id', session.user.id)
+      .single();
+
+    if (error || !profile || !profile.is_admin) {
+      showNotAdmin();
+      return;
+    }
+
+    showDashboard();
   }
 
   function showLogin() {
     loginCard.style.display = 'block';
+    notAdminMsg.style.display = 'none';
     dashboard.style.display = 'none';
     logoutBtn.style.display = 'none';
   }
 
+  function showNotAdmin() {
+    loginCard.style.display = 'none';
+    notAdminMsg.style.display = 'block';
+    dashboard.style.display = 'none';
+    logoutBtn.style.display = 'inline-block';
+  }
+
   function showDashboard() {
     loginCard.style.display = 'none';
+    notAdminMsg.style.display = 'none';
     dashboard.style.display = 'block';
     logoutBtn.style.display = 'inline-block';
     loadSightings();
+    loadCatches();
   }
 
   // ---- Login ----
@@ -328,7 +436,7 @@
       loginError.textContent = 'Λάθος email ή κωδικός.';
       loginError.style.display = 'block';
     } else {
-      showDashboard();
+      checkSession();
     }
   });
 
@@ -338,7 +446,27 @@
     showLogin();
   });
 
-  // ---- Φόρτωση όλων των αναφορών (επιτρέπεται γιατί είμαστε authenticated) ----
+  // ---- Section tabs ----
+  document.querySelectorAll('.section-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.section-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      document.querySelectorAll('.section-content').forEach(c => c.classList.remove('active'));
+      document.getElementById('section-' + tab.dataset.section).classList.add('active');
+    });
+  });
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  // ===================================================================
+  // ============ ΑΝΑΦΟΡΕΣ (sightings) ==================================
+  // ===================================================================
+
   async function loadSightings() {
     summaryEl.textContent = 'Φόρτωση...';
 
@@ -400,14 +528,6 @@
     });
   }
 
-  function escapeHtml(str) {
-    if (!str) return '';
-    const div = document.createElement('div');
-    div.textContent = str;
-    return div.innerHTML;
-  }
-
-  // ---- Ενέργειες (event delegation) ----
   listEl.addEventListener('click', async (e) => {
     const btn = e.target.closest('button[data-action]');
     if (!btn) return;
@@ -431,13 +551,118 @@
     loadSightings();
   });
 
-  // ---- Φίλτρα ----
-  document.querySelectorAll('.toggle-btn').forEach(btn => {
+  document.querySelectorAll('[data-filter]').forEach(btn => {
     btn.addEventListener('click', () => {
-      document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('[data-filter]').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       currentFilter = btn.dataset.filter;
       renderList();
+    });
+  });
+
+  // ===================================================================
+  // ============ ΑΛΙΕΥΜΑΤΑ (fisher_catches) ============================
+  // ===================================================================
+
+  async function loadCatches() {
+    summaryCatchesEl.textContent = 'Φόρτωση...';
+
+    const { data, error } = await supabaseClient
+      .from('fisher_catches')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      summaryCatchesEl.textContent = 'Σφάλμα φόρτωσης: ' + error.message;
+      return;
+    }
+
+    allCatchRows = data;
+
+    const userIds = [...new Set(data.map(r => r.user_id))];
+    if (userIds.length > 0) {
+      const { data: profiles } = await supabaseClient
+        .from('profiles')
+        .select('id, display_name')
+        .in('id', userIds);
+      profileNameMap = {};
+      (profiles || []).forEach(p => { profileNameMap[p.id] = p.display_name; });
+    }
+
+    renderCatchList();
+  }
+
+  function renderCatchList() {
+    const pendingCount = allCatchRows.filter(r => !r.approved).length;
+    const approvedCount = allCatchRows.filter(r => r.approved).length;
+    summaryCatchesEl.textContent = `${pendingCount} εκκρεμή · ${approvedCount} εγκεκριμένα · ${allCatchRows.length} σύνολο`;
+
+    let filtered;
+    if (currentCatchFilter === 'pending') filtered = allCatchRows.filter(r => !r.approved);
+    else if (currentCatchFilter === 'approved') filtered = allCatchRows.filter(r => r.approved);
+    else filtered = allCatchRows;
+
+    listCatchesEl.innerHTML = '';
+    emptyMsgCatches.style.display = filtered.length === 0 ? 'block' : 'none';
+
+    filtered.forEach(row => {
+      const card = document.createElement('div');
+      card.className = 'card' + (row.approved ? ' approved' : '');
+
+      const submittedStr = new Date(row.created_at).toLocaleString('el-GR');
+      const userName = profileNameMap[row.user_id] || 'Άγνωστος χρήστης';
+
+      const isPdf = row.proof_file_url && row.proof_file_url.toLowerCase().endsWith('.pdf');
+      const proofHtml = isPdf
+        ? `<a class="proof-link" href="${row.proof_file_url}" target="_blank" rel="noopener">📄 Δες το αποδεικτικό PDF →</a>`
+        : `<img class="card-photo" src="${row.proof_file_url}" alt="Αποδεικτικό αλιεύματος">`;
+
+      card.innerHTML = `
+        <div class="card-top">
+          <span class="loc">${escapeHtml(userName)} — ${parseFloat(row.kilos).toFixed(1)}kg</span>
+          <span class="badge ${row.approved ? 'approved' : 'pending'}">${row.approved ? 'Εγκεκριμένο' : 'Εκκρεμεί'}</span>
+        </div>
+        <div class="date">📅 Υποβλήθηκε: ${submittedStr}</div>
+        ${row.notes ? `<div class="desc">${escapeHtml(row.notes)}</div>` : ''}
+        ${proofHtml}
+        <div class="card-actions">
+          ${!row.approved ? `<button class="btn-approve" data-id="${row.id}" data-action="approve">✓ Έγκριση</button>` : `<button class="btn-reject" data-id="${row.id}" data-action="unapprove">↩ Αναίρεση έγκρισης</button>`}
+          <button class="btn-reject" data-id="${row.id}" data-action="delete">✕ Διαγραφή</button>
+        </div>
+      `;
+      listCatchesEl.appendChild(card);
+    });
+  }
+
+  listCatchesEl.addEventListener('click', async (e) => {
+    const btn = e.target.closest('button[data-action]');
+    if (!btn) return;
+
+    const id = btn.dataset.id;
+    const action = btn.dataset.action;
+    btn.disabled = true;
+
+    if (action === 'approve') {
+      await supabaseClient.from('fisher_catches').update({ approved: true }).eq('id', id);
+    } else if (action === 'unapprove') {
+      await supabaseClient.from('fisher_catches').update({ approved: false }).eq('id', id);
+    } else if (action === 'delete') {
+      if (!confirm('Σίγουρα θέλεις να διαγράψεις οριστικά αυτό το αλίευμα;')) {
+        btn.disabled = false;
+        return;
+      }
+      await supabaseClient.from('fisher_catches').delete().eq('id', id);
+    }
+
+    loadCatches();
+  });
+
+  document.querySelectorAll('[data-filter-catch]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('[data-filter-catch]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentCatchFilter = btn.dataset.filterCatch;
+      renderCatchList();
     });
   });
 
